@@ -12,11 +12,82 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+variables:
+- name: ProjectName
+  value: FCOM
+- name: Environment
+  ${{ if startsWith(variables['Build.SourceBranchName'], 'release')}}: 
+    value: prod
+  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}: 
+    value: prod    
+  ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}: 
+    value: dev
+  ${{ if contains(variables['Build.SourceBranchName'], 'tag')}}: 
+    value: dev    
+- name : CostCenter
+  value: ABC000CBA
+- name: Region
+  value: EUC1
+- name: OpportunityImageName
+  value: opportunity
+- name: CustomerImageName
+  value: customer
+- name: ServiceImageName
+  value: service
+- name: AppSettingImageName
+  value: appsetting  
+- name: TF_OUTPUT_S3_BUCKETNAME
+  value: "Empty"
+- name: TF_OUTPUT_ALB_DNSNAME
+  value: "Empty"
+# - name: TF_OUTPUT_COTGNITO_AUDIENCE
+#   value: "Empty"
+# - name: TF_OUTPUT_COTGNITO_POOLID
+#   value: "Empty"
+- name: TF_OUTPUT_COTGNITOS_AUDIENCE
+  value: "Empty"
+- name: TF_OUTPUT_COTGNITOS_POOLID
+  value: "Empty"
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+stages:
+  - stage: 
+    displayName: 'Test and Validation'
+    jobs:
+      - job: 
+        # condition: in(variables.Environment, 'dev', 'prod', 'acc')
+        continueOnError: false
+        steps:
+
+          - task: Bash@3
+            displayName: 'Pipeline info'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo 'Environment:' ${{variables.environment}}
+                echo 'BuildId: ' $(Build.BuildId)
+                echo 'SourceBranchName:' $(Build.SourceBranchName)
+          - task: TerraformInstaller@0
+            displayName: 'Install TF'
+            continueOnError: false
+            inputs:
+              terraformVersion: '0.14.8'  
+
+#----------------- Cognito validation
+          - task: TerraformTaskV1@0
+            displayName: 'Init TF to validate Cognito'
+            inputs:
+              provider: 'aws'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              backendServiceAWS: 'aws-sample-connection'
+              backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
+              backendAWSKey: "cognito/terraform.tfstate"
+
+          - task: TerraformTaskV1@0
+            displayName: 'Validate Cognito'
+            inputs:
+              provider: 'aws'
+              command: 'validate'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
+
