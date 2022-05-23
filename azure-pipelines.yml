@@ -49,12 +49,45 @@ variables:
 - name: TF_OUTPUT_COTGNITOS_POOLID
   value: "Empty"
 
+stages:
+  - stage: 
+    displayName: 'Test and Validation'
+    jobs:
+      - job: 
+        # condition: in(variables.Environment, 'dev', 'prod', 'acc')
+        continueOnError: false
+        steps:
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+          - task: Bash@3
+            displayName: 'Pipeline info'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo 'Environment:' ${{variables.environment}}
+                echo 'BuildId: ' $(Build.BuildId)
+                echo 'SourceBranchName:' $(Build.SourceBranchName)
+          - task: TerraformInstaller@0
+            displayName: 'Install TF'
+            continueOnError: false
+            inputs:
+              terraformVersion: '0.14.8'  
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+#----------------- Cognito validation
+          - task: TerraformTaskV1@0
+            displayName: 'Init TF to validate Cognito'
+            inputs:
+              provider: 'aws'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              backendServiceAWS: 'aws-fcom-terraform-deployment'
+              backendAWSBucketName: 'terraform-fcom-euc1-${{variables.Environment}}'
+              backendAWSKey: "cognito/terraform.tfstate"
+
+          - task: TerraformTaskV1@0
+            displayName: 'Validate Cognito'
+            inputs:
+              provider: 'aws'
+              command: 'validate'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
+
