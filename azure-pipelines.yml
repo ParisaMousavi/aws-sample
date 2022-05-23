@@ -12,6 +12,44 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+- name: ProjectName
+  value: FCOM
+- name: Environment
+  ${{ if startsWith(variables['Build.SourceBranchName'], 'release')}}: 
+    value: prod
+  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}: 
+    value: prod    
+  ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}: 
+    value: dev
+  ${{ if contains(variables['Build.SourceBranchName'], 'tag')}}: 
+    value: dev    
+- name : CostCenter
+  value: ABC000CBA
+- name: Region
+  value: EUC1
+- name: OpportunityImageName
+  value: opportunity
+- name: CustomerImageName
+  value: customer
+- name: ServiceImageName
+  value: service
+- name: AppSettingImageName
+  value: appsetting  
+- name: TF_OUTPUT_S3_BUCKETNAME
+  value: "Empty"
+- name: TF_OUTPUT_ALB_DNSNAME
+  value: "Empty"
+# - name: TF_OUTPUT_COTGNITO_AUDIENCE
+#   value: "Empty"
+# - name: TF_OUTPUT_COTGNITO_POOLID
+#   value: "Empty"
+- name: TF_OUTPUT_COTGNITOS_AUDIENCE
+  value: "Empty"
+- name: TF_OUTPUT_COTGNITOS_POOLID
+  value: "Empty"
+
+
 steps:
 - script: echo Hello, world!
   displayName: 'Run a one-line script'
