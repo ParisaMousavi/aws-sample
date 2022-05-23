@@ -22,7 +22,7 @@ resource "aws_cognito_user_pool" "userpool" {
     allow_admin_create_user_only = true
     invite_message_template {
       email_subject = "Your invitation to FCO Application"
-      email_message = file("${path.module}/invitation_message.html")
+      email_message = file("${path.module}/template/invitation_message.html")
       sms_message   = "Your username is {username} and temporary password is {####}."
     }
   }
