@@ -79,8 +79,8 @@ stages:
               provider: 'aws'
               command: 'init'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
-              backendServiceAWS: 'aws-fcom-terraform-deployment'
-              backendAWSBucketName: 'terraform-fcom-euc1-${{variables.Environment}}'
+              backendServiceAWS: 'aws-sample-connection'
+              backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
               backendAWSKey: "cognito/terraform.tfstate"
 
           - task: TerraformTaskV1@0
