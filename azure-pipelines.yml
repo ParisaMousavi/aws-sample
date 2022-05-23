@@ -72,6 +72,26 @@ stages:
             inputs:
               terraformVersion: '0.14.8'  
 
+#----------------- S3 Static website validation
+          - task: TerraformTaskV1@0
+            displayName: 'Init TF to validate S3'
+            inputs:
+              provider: 'aws'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/s3'
+              backendServiceAWS: 'aws-sample-connection'
+              backendAWSBucketName: 'terraform-fcom-euc1-${{variables.Environment}}'
+              backendAWSKey: 's3/terraform.tfstate'      
+
+          - task: TerraformTaskV1@0
+            displayName: 'Validate S3'
+            inputs:
+              provider: 'aws'
+              command: 'validate'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/s3'
+              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
+
+
 #----------------- Cognito validation
           - task: TerraformTaskV1@0
             displayName: 'Init TF to validate Cognito'
