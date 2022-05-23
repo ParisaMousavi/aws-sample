@@ -80,7 +80,7 @@ stages:
               command: 'init'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/s3'
               backendServiceAWS: 'aws-sample-connection'
-              backendAWSBucketName: 'terraform-fcom-euc1-${{variables.Environment}}'
+              backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
               backendAWSKey: 's3/terraform.tfstate'      
 
           - task: TerraformTaskV1@0
