@@ -14,7 +14,7 @@ pool:
 
 variables:
 - name: ProjectName
-  value: FCOM
+  value: AWS_SAMPLE
 - name: Environment
   ${{ if startsWith(variables['Build.SourceBranchName'], 'release')}}: 
     value: prod
@@ -145,7 +145,7 @@ stages:
               command: 'apply'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/s3'
               commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
-              environmentServiceNameAWS: 'aws-fcom-terraform-deployment' 
+              environmentServiceNameAWS: 'aws-sample-connection' 
 
           - task: Bash@3
             displayName: 'S3 Info'
