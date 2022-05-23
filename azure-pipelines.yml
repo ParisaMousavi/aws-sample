@@ -4,7 +4,10 @@
 # https://aka.ms/yaml
 
 trigger:
-- main
+  batch: false
+  branches:
+    include:
+      - develop
 
 pool:
   vmImage: ubuntu-latest
