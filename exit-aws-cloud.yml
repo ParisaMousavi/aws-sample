@@ -1,0 +1,148 @@
+trigger:
+  - none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+- name: ProjectName
+  value: AWS-SAMPLE
+- name: Environment
+  ${{ if startsWith(variables['Build.SourceBranchName'], 'release')}}: 
+    value: prod
+  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}: 
+    value: prod    
+  ${{ if eq(variables['Build.SourceBranchName'], 'develop') }}: 
+    value: dev
+  ${{ if contains(variables['Build.SourceBranchName'], 'tag')}}: 
+    value: dev    
+- name : CostCenter
+  value: ABC000CBA
+- name: Region
+  value: EUC1
+- name: OpportunityImageName
+  value: opportunity
+- name: CustomerImageName
+  value: customer
+- name: ServiceImageName
+  value: service
+- name: AppSettingImageName
+  value: appsetting  
+
+
+stages:
+  - stage: 
+    displayName: 'Test and Validation'
+    jobs:
+      - job: 
+        # condition: in(variables.Environment, 'dev', 'prod', 'acc')
+        continueOnError: false
+        steps:
+
+          - task: Bash@3
+            displayName: 'Pipeline info'
+            inputs:
+              targetType: 'inline'
+              script: |
+                echo 'Environment:' ${{variables.environment}}
+                echo 'BuildId: ' $(Build.BuildId)
+                echo 'SourceBranchName:' $(Build.SourceBranchName)
+          - task: TerraformInstaller@0
+            displayName: 'Install TF'
+            continueOnError: false
+            inputs:
+              terraformVersion: '0.14.8'  
+
+#----------------- S3 Static website validation
+          - task: TerraformTaskV1@0
+            displayName: 'Init TF to validate S3'
+            inputs:
+              provider: 'aws'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/s3'
+              backendServiceAWS: 'aws-sample-connection'
+              backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
+              backendAWSKey: 's3/terraform.tfstate'      
+
+          - task: TerraformTaskV1@0
+            displayName: 'Validate S3'
+            inputs:
+              provider: 'aws'
+              command: 'validate'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/s3'
+              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
+
+
+#----------------- Cognito validation
+          - task: TerraformTaskV1@0
+            displayName: 'Init TF to validate Cognito'
+            inputs:
+              provider: 'aws'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              backendServiceAWS: 'aws-sample-connection'
+              backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
+              backendAWSKey: "cognito/terraform.tfstate"
+
+          - task: TerraformTaskV1@0
+            displayName: 'Validate Cognito'
+            inputs:
+              provider: 'aws'
+              command: 'validate'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
+
+#-----------------------------------------------------------------------------------------------------------------------------------
+  - stage: 
+    displayName: 'Destroy'
+    condition: and(succeeded(), in(variables.Environment, 'dev', 'prod', 'acc'))
+    jobs:
+      - job: 
+        continueOnError: false
+        steps:
+
+          - task: TerraformInstaller@0
+            displayName: 'Install TF'
+            continueOnError: false
+            inputs:
+              terraformVersion: '0.14.8'
+
+#----------------- S3 Static website
+          - task: TerraformTaskV1@0
+            displayName: 'Init TF to destroy S3'
+            inputs:
+              provider: 'aws'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/s3'
+              backendServiceAWS: 'aws-sample-connection'
+              backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
+              backendAWSKey: 's3/terraform.tfstate'      
+
+          - task: TerraformTaskV1@0
+            displayName: 'destroy S3'
+            inputs:
+              provider: 'aws'
+              command: 'destroy'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/s3'
+              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
+              environmentServiceNameAWS: 'aws-sample-connection' 
+
+#----------------- Cognito
+          - task: TerraformTaskV1@0
+            displayName: 'Init TF to destroy Cognito'
+            inputs:
+              provider: 'aws'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              backendServiceAWS: 'aws-sample-connection'
+              backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
+              backendAWSKey: "cognito/terraform.tfstate"
+                           
+          - task: TerraformTaskV1@0
+            displayName: 'destroy Cognito'
+            inputs:
+              provider: 'aws'
+              command: 'destroy'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
+              environmentServiceNameAWS: 'aws-sample-connection'                   
