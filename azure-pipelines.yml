@@ -14,7 +14,7 @@ pool:
 
 variables:
 - name: ProjectName
-  value: AWS_SAMPLE
+  value: AWS-SAMPLE
 - name: Environment
   ${{ if startsWith(variables['Build.SourceBranchName'], 'release')}}: 
     value: prod
