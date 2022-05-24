@@ -37,3 +37,10 @@ variable "region" {
   type    = string
   default = "EUC1"
 }
+
+variable "terraform_remote_state_bucket" {
+  type    = string
+  default = "terraform-aws-sample-dev-euc1"
+}
+
+

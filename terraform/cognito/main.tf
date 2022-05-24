@@ -1,3 +1,20 @@
+data "terraform_remote_state" "s3" {
+  backend = "s3"
+  config = {
+    bucket = var.terraform_remote_state_bucket
+    key    = "s3/terraform.tfstate"
+    region = "eu-central-1"
+  }
+}
+
+
+data "template_file" "invitation_email" {
+  template = file("${path.module}/template/invitation_message.html")
+  vars = {
+    image_bucket_regional_domain_name = data.terraform_remote_state.s3.outputs.image_bucket_regional_domain_name
+  }
+}
+
 resource "aws_cognito_user_pool" "userpool" {
   name              = "${lower(var.projectname)}-${lower(var.environment)}-${lower(var.region)}"
   mfa_configuration = "OFF"
@@ -22,7 +39,7 @@ resource "aws_cognito_user_pool" "userpool" {
     allow_admin_create_user_only = true
     invite_message_template {
       email_subject = "Your invitation to FCO Application"
-      email_message = file("${path.module}/template/invitation_message.html")
+      email_message = data.template_file.invitation_email.rendered
       sms_message   = "Your username is {username} and temporary password is {####}."
     }
   }
@@ -90,13 +107,6 @@ resource "aws_cognito_user_group" "Admingroup" {
   user_pool_id = aws_cognito_user_pool.userpool.id
 }
 
-# For later
-# resource "aws_cognito_user_group" "Sibegroup" {
-#   name         = "CiscoSibegroup"
-#   description  = "Cisco SIBE users for Secret Protection Opps"
-#   user_pool_id = aws_cognito_user_pool.userpool.id
-# }
-
 
 resource "aws_cognito_user_pool_client" "client" {
   name                                 = "${lower(var.projectname)}-${lower(var.environment)}-app-${lower(var.region)}"
@@ -112,6 +122,6 @@ resource "aws_cognito_user_pool_client" "client" {
 }
 
 resource "aws_cognito_user_pool_domain" "domain" {
-  domain       = "${lower(var.environment)}-cc-fco"
+  domain       = "${lower(var.environment)}.${lower(var.domainname)}"
   user_pool_id = aws_cognito_user_pool.userpool.id
 }
