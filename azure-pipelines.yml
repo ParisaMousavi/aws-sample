@@ -139,7 +139,6 @@ stages:
 
           - task: TerraformTaskV1@0
             displayName: 'Deploy S3'
-            name: 'TF_S3_OUTPUTS'
             inputs:
               provider: 'aws'
               command: 'apply'
@@ -147,57 +146,7 @@ stages:
               commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
               environmentServiceNameAWS: 'aws-sample-connection' 
 
-          - task: Bash@3
-            displayName: 'S3 Info'
-            name: 'S3Info'
-            inputs:
-              targetType: 'inline'
-              script: |
-
-                #-------------------------------------------------------------------------------------------
-                # Only display the S3 terraform deployment output
-                #-------------------------------------------------------------------------------------------
-                cat $(TF_S3_OUTPUTS.jsonOutputVariablesPath)
-
-                #-------------------------------------------------------------------------------------------
-                # Keep the terrafrom output s3_bucket_name in a runtime variable for later usage
-                #-------------------------------------------------------------------------------------------
-                TF_OUTPUT_S3_BUCKETNAME="$(cat $(TF_S3_OUTPUTS.jsonOutputVariablesPath) | jq '.s3_bucket_name.value' -r)"
-                echo "##vso[task.setvariable variable=TF_OUTPUT_S3_BUCKETNAME1;isOutput=true;]$TF_OUTPUT_S3_BUCKETNAME"
-                echo "##vso[task.setvariable variable=TF_OUTPUT_S3_BUCKETNAME]$TF_OUTPUT_S3_BUCKETNAME"
-
-                #-------------------------------------------------------------------------------------------
-                # Keep the terrafrom output bucket_regional_domain_name_image in a bash variable to replace it in the cognito invitation email.
-                #-------------------------------------------------------------------------------------------
-                TF_OUTPUT_S3_IMAGE_DOMAIN_NAME="$(cat $(TF_S3_OUTPUTS.jsonOutputVariablesPath) | jq '.bucket_regional_domain_name_image.value' -r)"
-
-                #-------------------------------------------------------------------------------------------
-                # Version < 6.0
-                # Change the path to terraform/cognito to replace a placeholder in the cognito invitation email body, which is deployed in the next step
-                #-------------------------------------------------------------------------------------------
-                cd $(System.DefaultWorkingDirectory)/terraform/cognito
-                sed -i "s/<S3_DOMAIN_NAME_IMAGE>/$TF_OUTPUT_S3_IMAGE_DOMAIN_NAME/g" invitation_message.html
-
-                # #-------------------------------------------------------------------------------------------
-                # # Version >= 6.0
-                # # Change the path to terraform/solution/cognitos/templates to replace a placeholder in the cognito invitation email body, which is deployed in the next step
-                # # This line only replace the image Urls in the invitation email body
-                # #-------------------------------------------------------------------------------------------
-                # cd $(System.DefaultWorkingDirectory)/terraform/solution/cognitos/templates
-                # sed -i "s/<S3_DOMAIN_NAME_IMAGE>/$TF_OUTPUT_S3_IMAGE_DOMAIN_NAME/g" invitation_message.html
-
-
 #----------------- Cognito
-          - task: Bash@3
-            displayName: 'Customize Cognito Email'
-            inputs:
-              targetType: 'inline'
-              script: |
-                cd $(System.DefaultWorkingDirectory)/terraform/cognito
-                DOMAIN_NAME=$(if [ ${{variables.Environment}} != "prod" ]; then echo ${{variables.Environment}}.$(DOMAIN); else echo $(DOMAIN); fi)
-                sed -i "s/<APPLICATION_URL>/$DOMAIN_NAME/g" invitation_message.html
-                cat invitation_message.html
-
           - task: TerraformTaskV1@0
             displayName: 'Init TF to deploy Cognito'
             inputs:
@@ -210,28 +159,9 @@ stages:
                            
           - task: TerraformTaskV1@0
             displayName: 'Deploy Cognito'
-            name: 'TF_COGNITO_OUTPUTS'
             inputs:
               provider: 'aws'
               command: 'apply'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
               commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
               environmentServiceNameAWS: 'aws-sample-connection'                   
-
-          - task: Bash@3
-            displayName: 'Cognito Info'
-            name: 'CognitoInfo'
-            inputs:
-              targetType: 'inline'
-              script: |
-
-                cat invitation_message.html  
-                
-                cat $(TF_COGNITO_OUTPUTS.jsonOutputVariablesPath)
-                TF_OUTPUT_COTGNITO_AUDIENCE="$(cat $(TF_COGNITO_OUTPUTS.jsonOutputVariablesPath) | jq '.audience.value' -r)"
-                # echo "##vso[task.setvariable variable=TF_OUTPUT_COTGNITO_AUDIENCE1;isOutput=true;]$TF_OUTPUT_COTGNITO_AUDIENCE"
-                echo "##vso[task.setvariable variable=TF_OUTPUT_COTGNITO_AUDIENCE]$TF_OUTPUT_COTGNITO_AUDIENCE"
-
-                TF_OUTPUT_COTGNITO_POOLID="$(cat $(TF_COGNITO_OUTPUTS.jsonOutputVariablesPath) | jq '.poolid.value' -r)"
-                # echo "##vso[task.setvariable variable=TF_OUTPUT_COTGNITO_POOLID1;isOutput=true;]$TF_OUTPUT_COTGNITO_POOLID"
-                echo "##vso[task.setvariable variable=TF_OUTPUT_COTGNITO_POOLID]$TF_OUTPUT_COTGNITO_POOLID"
