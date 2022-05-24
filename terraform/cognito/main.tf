@@ -114,14 +114,14 @@ resource "aws_cognito_user_pool_client" "client" {
   user_pool_id                         = aws_cognito_user_pool.userpool.id
   explicit_auth_flows                  = ["ALLOW_USER_SRP_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"]
   allowed_oauth_flows                  = ["code"]
-  callback_urls                        = ["https://${lower(var.environment)}.${lower(var.domainname)}/"]
+  callback_urls                        = ["https://${lower(var.environment)}.${lower(var.domainname)}.com/"]
   allowed_oauth_scopes                 = ["phone", "email", "openid", "profile", "aws.cognito.signin.user.admin"]
   allowed_oauth_flows_user_pool_client = true
   prevent_user_existence_errors        = "ENABLED"
   supported_identity_providers         = ["COGNITO"]
 }
 
-# resource "aws_cognito_user_pool_domain" "domain" {
-#   domain       = "${lower(var.environment)}-${lower(var.domainname)}"
-#   user_pool_id = aws_cognito_user_pool.userpool.id
-# }
+resource "aws_cognito_user_pool_domain" "domain" {
+  domain       = "${lower(var.environment)}-${lower(var.domainname)}"
+  user_pool_id = aws_cognito_user_pool.userpool.id
+}

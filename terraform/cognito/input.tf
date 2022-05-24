@@ -3,7 +3,7 @@
 #----------------------------------------------------
 variable "domainname" {
   type    = string
-  default = "cc-fco.de"
+  default = "multi-cloud-solutions"
 }
 
 #----------------------------------------------------
