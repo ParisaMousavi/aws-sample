@@ -121,7 +121,7 @@ resource "aws_cognito_user_pool_client" "client" {
   supported_identity_providers         = ["COGNITO"]
 }
 
-resource "aws_cognito_user_pool_domain" "domain" {
-  domain       = "${lower(var.environment)}.${lower(var.domainname)}"
-  user_pool_id = aws_cognito_user_pool.userpool.id
-}
+# resource "aws_cognito_user_pool_domain" "domain" {
+#   domain       = "${lower(var.environment)}-${lower(var.domainname)}"
+#   user_pool_id = aws_cognito_user_pool.userpool.id
+# }

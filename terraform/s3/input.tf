@@ -4,7 +4,7 @@
 #----------------------------------------------------
 variable "domainname" {
   type    = string
-  default = "multi-cloud-solutions.com"
+  default = "multi-cloud-solutions"
 }
 
 #----------------------------------------------------
