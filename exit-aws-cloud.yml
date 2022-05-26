@@ -106,6 +106,25 @@ stages:
             continueOnError: false
             inputs:
               terraformVersion: '0.14.8'
+#----------------- Cognito
+          - task: TerraformTaskV1@0
+            displayName: 'Init TF to destroy Cognito'
+            inputs:
+              provider: 'aws'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              backendServiceAWS: 'aws-sample-connection'
+              backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
+              backendAWSKey: "cognito/terraform.tfstate"
+                           
+          - task: TerraformTaskV1@0
+            displayName: 'destroy Cognito'
+            inputs:
+              provider: 'aws'
+              command: 'destroy'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
+              environmentServiceNameAWS: 'aws-sample-connection'                   
 
 #----------------- S3 Static website
           - task: TerraformTaskV1@0
@@ -127,22 +146,3 @@ stages:
               commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
               environmentServiceNameAWS: 'aws-sample-connection' 
 
-#----------------- Cognito
-          - task: TerraformTaskV1@0
-            displayName: 'Init TF to destroy Cognito'
-            inputs:
-              provider: 'aws'
-              command: 'init'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
-              backendServiceAWS: 'aws-sample-connection'
-              backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
-              backendAWSKey: "cognito/terraform.tfstate"
-                           
-          - task: TerraformTaskV1@0
-            displayName: 'destroy Cognito'
-            inputs:
-              provider: 'aws'
-              command: 'destroy'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
-              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=${{variables.ProjectName}}" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
-              environmentServiceNameAWS: 'aws-sample-connection'                   
