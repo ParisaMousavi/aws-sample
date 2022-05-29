@@ -89,9 +89,9 @@ resource "aws_cognito_user_pool" "userpool" {
 }
 
 
-resource "aws_cognito_user_group" "Computacentergroup" {
-  name         = "Computacentergroup"
-  description  = "Account manager users from Computacenter"
+resource "aws_cognito_user_group" "MyCompanygroup" {
+  name         = "MyCompanygroup"
+  description  = "Account manager users from MyCompany"
   user_pool_id = aws_cognito_user_pool.userpool.id
 }
 
