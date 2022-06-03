@@ -10,10 +10,6 @@ variable "region_short_name" {
   type = string
 }
 
-variable "costcenter" {
+variable "perfix" {
   type = string
-}
-
-variable "domainname" {
-  type    = string
 }
