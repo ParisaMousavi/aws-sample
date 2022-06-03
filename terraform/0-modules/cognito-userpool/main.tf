@@ -2,7 +2,7 @@ resource "aws_cognito_user_pool" "this" {
   name                       = var.name
   auto_verified_attributes   = var.mfa_configuration != null ? ["email"] : []
   mfa_configuration          = var.mfa_configuration != "OFF" ? var.mfa_configuration : "OFF"
-  sms_authentication_message = var.mfa_configuration != "OFF" ? "Cisco Fcom : Your verification code is {####}" : ""
+  sms_authentication_message = var.mfa_configuration != "OFF" ? "Cisco Fcom : Your verification code is {####}" : null
 
 
   dynamic "sms_configuration" {
@@ -40,7 +40,7 @@ resource "aws_cognito_user_pool" "this" {
     allow_admin_create_user_only = true
     invite_message_template {
       email_subject = var.invite_message_template.email_subject
-      email_message = file(var.invite_message_template.email_message_filepath)
+      email_message = var.invite_message_template.email_message_content
       sms_message   = var.invite_message_template.sms_message
     }
   }

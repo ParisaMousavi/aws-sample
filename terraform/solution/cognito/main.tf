@@ -27,12 +27,28 @@ module "cognito_images" {
   }
 }
 
+data "template_file" "invitation_email" {
+  template = file("${path.module}/template/invitation_message.html")
+  vars = {
+    image_bucket_regional_domain_name = module.cognito_images.bucket_regional_domain_name
+  }
+}
+
 module "cognito_userpool_name" {
   source            = "../../0-modules/0-tf-name/cognito-userpool"
   projectname       = var.projectname
   environment       = var.environment
   perfix            = "a"
   region_short_name = var.region_short_name
+}
+
+module "cognito_userpool_domain" {
+  source            = "../../0-modules/0-tf-name/cognito-userpool-domain"
+  projectname       = var.projectname
+  environment       = var.environment
+  perfix            = "a"
+  region_short_name = var.region_short_name
+  domainname        = var.domainname
 }
 
 module "cognito_userpool" {
@@ -44,9 +60,9 @@ module "cognito_userpool" {
   mfa_configuration = "OFF"
   sms_configuration = null
   invite_message_template = {
-    email_subject          = "Your invitation to MY Application"
-    email_message_filepath = "${path.module}/templates/invitation_message.html"
-    sms_message            = "Your username is {username} and temporary password is {####}."
+    email_subject         = "Your invitation to MY Application"
+    email_message_content = data.template_file.invitation_email.rendered
+    sms_message           = "Your username is {username} and temporary password is {####}."
   }
   schemas = {
     "family_name" = {
@@ -72,7 +88,7 @@ module "cognito_userpool" {
       }
     }
   }
-  user_pool_domain_name = "${lower(var.environment)}-${lower(var.domainname)}"
+  user_pool_domain_name = module.cognito_userpool_domain.default
   groups = {
     "Mygroup" = {
       name        = "Computacentergroup"

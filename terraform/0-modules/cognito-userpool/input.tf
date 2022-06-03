@@ -15,7 +15,7 @@ variable "mfa_configuration" {
 variable "invite_message_template" {
   type = object({
     email_subject          = string,
-    email_message_filepath = string,
+    email_message_content = string,
     sms_message            = string
   })
 }
