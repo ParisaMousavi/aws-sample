@@ -29,9 +29,9 @@ resource "aws_internet_gateway" "this" {
 resource "aws_route" "this" {
   count = var.with_internet_gateway == true ? 1 : 0
   depends_on = [
-    aws_internet_gateway.this
+    aws_internet_gateway.this[0]
   ]
   route_table_id         = aws_vpc.this.main_route_table_id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.this.id
+  gateway_id             = aws_internet_gateway.this[0].id
 }
