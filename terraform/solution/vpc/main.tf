@@ -113,3 +113,46 @@ module "vpc" {
   }
 }
 
+module "default_route_table_name" {
+  source            = "../../0-modules/0-tf-name/route-table"
+  projectname       = var.projectname
+  environment       = var.environment
+  perfix            = "default"
+  region_short_name = var.region_short_name
+}
+
+module "default_route_table" {
+  source                 = "../../0-modules/route-table"
+  default_route_table_id =  module.vpc.default_route_table_id
+  vpc_id                 = null
+  routes = {} // for later if NAT is needed
+  subnet_ids = [] // for later if NAT is needed
+  tags = {
+    Name        = module.default_route_table_name.default
+    Environment = var.environment
+    Project     = var.projectname
+    CostCenter  = var.costcenter
+  }
+}
+
+module "route_table_name" {
+  source            = "../../0-modules/0-tf-name/route-table"
+  projectname       = var.projectname
+  environment       = var.environment
+  perfix            = "private"
+  region_short_name = var.region_short_name
+}
+
+module "private_route_table" {
+  source                 = "../../0-modules/route-table"
+  default_route_table_id = null
+  vpc_id                 = module.vpc.vpc_id
+  routes = {} // for later if NAT is needed
+  subnet_ids = [] // for later if NAT is needed
+  tags = {
+    Name        = module.route_table_name.default
+    Environment = var.environment
+    Project     = var.projectname
+    CostCenter  = var.costcenter
+  }
+}
