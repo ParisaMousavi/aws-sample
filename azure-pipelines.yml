@@ -85,6 +85,25 @@ stages:
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/solution/cognito'
               commandOptions: '-var "region_short_name=$(region_short_name)" -var "costcenter=$(costcenter)" -var "projectname=$(projectname)" -var "environment=${{variables.environment}}" '
 
+#----------------- VPC validation
+          - task: TerraformTaskV1@0
+            displayName: 'Init TF to validate VPC'
+            inputs:
+              provider: 'aws'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/solution/vpc'
+              backendServiceAWS: 'aws-sample-connection'
+              backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
+              backendAWSKey: "solution/vpc/terraform.tfstate"
+
+          - task: TerraformTaskV1@0
+            displayName: 'Validate VPC'
+            inputs:
+              provider: 'aws'
+              command: 'validate'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/solution/vpc'
+              commandOptions: '-var "region_short_name=$(region_short_name)" -var "costcenter=$(costcenter)" -var "projectname=$(projectname)" -var "environment=${{variables.environment}}" '
+
 #-----------------------------------------------------------------------------------------------------------------------------------
   - stage: 
     displayName: 'CI/CD'
