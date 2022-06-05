@@ -10,6 +10,7 @@ resource "aws_vpc" "this" {
     var.tags,
     {
       created-by = "terraform"
+      Name = var.name
     },
   )
 }
@@ -34,4 +35,19 @@ resource "aws_route" "this" {
   route_table_id         = aws_vpc.this.main_route_table_id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.this[0].id
+}
+
+resource "aws_subnet" "private" {
+  for_each          = var.private_subnets
+  cidr_block        = each.value.cidr_block
+  availability_zone = each.value.availability_zone
+  vpc_id            = aws_vpc.this.id
+
+  tags = merge(
+    var.tags,
+    {
+      created-by = "terraform"
+      Name = each.key
+    },
+  )
 }
