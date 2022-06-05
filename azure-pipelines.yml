@@ -70,43 +70,23 @@ stages:
             inputs:
               terraformVersion: '0.14.8'  
 
-#----------------- S3 Static website validation
-          - task: TerraformTaskV1@0
-            displayName: 'Init TF to validate S3'
-            inputs:
-              provider: 'aws'
-              command: 'init'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/s3'
-              backendServiceAWS: 'aws-sample-connection'
-              backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
-              backendAWSKey: 's3/terraform.tfstate'      
-
-          - task: TerraformTaskV1@0
-            displayName: 'Validate S3'
-            inputs:
-              provider: 'aws'
-              command: 'validate'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/s3'
-              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=$(projectname)" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
-
-
 #----------------- Cognito validation
           - task: TerraformTaskV1@0
             displayName: 'Init TF to validate Cognito'
             inputs:
               provider: 'aws'
               command: 'init'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/solution/cognito'
               backendServiceAWS: 'aws-sample-connection'
               backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
-              backendAWSKey: "cognito/terraform.tfstate"
+              backendAWSKey: "solution/cognito/terraform.tfstate"
 
           - task: TerraformTaskV1@0
             displayName: 'Validate Cognito'
             inputs:
               provider: 'aws'
               command: 'validate'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/solution/cognito'
               commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=$(projectname)" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
 
 #-----------------------------------------------------------------------------------------------------------------------------------
@@ -124,42 +104,22 @@ stages:
             inputs:
               terraformVersion: '0.14.8'
 
-#----------------- S3 Static website
-          - task: TerraformTaskV1@0
-            displayName: 'Init TF to deploy S3'
-            inputs:
-              provider: 'aws'
-              command: 'init'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/s3'
-              backendServiceAWS: 'aws-sample-connection'
-              backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
-              backendAWSKey: 's3/terraform.tfstate'      
-
-          - task: TerraformTaskV1@0
-            displayName: 'Deploy S3'
-            inputs:
-              provider: 'aws'
-              command: 'apply'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/s3'
-              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=$(projectname)" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
-              environmentServiceNameAWS: 'aws-sample-connection' 
-
 #----------------- Cognito
           - task: TerraformTaskV1@0
             displayName: 'Init TF to deploy Cognito'
             inputs:
               provider: 'aws'
               command: 'init'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/solution/cognito'
               backendServiceAWS: 'aws-sample-connection'
               backendAWSBucketName: 'terraform-aws-sample-${{variables.Environment}}-euc1'
-              backendAWSKey: "cognito/terraform.tfstate"
+              backendAWSKey: "solution/cognito/terraform.tfstate"
                            
           - task: TerraformTaskV1@0
             displayName: 'Deploy Cognito'
             inputs:
               provider: 'aws'
               command: 'apply'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/cognito'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/solution/cognito'
               commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=$(projectname)" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
               environmentServiceNameAWS: 'aws-sample-connection'                   
