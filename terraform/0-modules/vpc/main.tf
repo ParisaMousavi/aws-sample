@@ -10,7 +10,7 @@ resource "aws_vpc" "this" {
     var.tags,
     {
       created-by = "terraform"
-      Name = var.name
+      Name       = var.name
     },
   )
 }
@@ -47,7 +47,29 @@ resource "aws_subnet" "private" {
     var.tags,
     {
       created-by = "terraform"
-      Name = each.key
+      Name       = each.key
     },
   )
+}
+
+resource "aws_subnet" "public" {
+  for_each          = var.public_subnets
+  cidr_block        = each.value.cidr_block
+  availability_zone = each.value.availability_zone
+  vpc_id            = aws_vpc.this.id
+
+  tags = merge(
+    var.tags,
+    {
+      created-by = "terraform"
+      Name       = each.key
+    },
+  )
+}
+
+// this is only for oublic subnets
+resource "aws_route_table_association" "this" {
+  for_each       = aws_subnet.public
+  subnet_id      = each.value.id
+  route_table_id = aws_vpc.this.main_route_table_id
 }

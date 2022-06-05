@@ -8,32 +8,32 @@ locals {
 
   private_subnets = {
     "acc" = {
-      "${module.subnet_private_name.default}" = {
+      "${module.subnet_private_name.default}-1" = {
         availability_zone = "eu-central-1a"
         cidr_block        = "10.102.1.0/24"
       },
-      "${module.subnet_private_name.default}" = {
-        availability_zone = "eu-central-1a"
+      "${module.subnet_private_name.default}-2" = {
+        availability_zone = "eu-central-1b"
         cidr_block        = "10.102.2.0/24"
       }
     },
     "dev" = {
-      "${module.subnet_private_name.default}" = {
+      "${module.subnet_private_name.default}-1" = {
         availability_zone = "eu-central-1a"
         cidr_block        = "10.101.1.0/24"
       },
-      "${module.subnet_private_name.default}" = {
-        availability_zone = "eu-central-1a"
+      "${module.subnet_private_name.default}-2" = {
+        availability_zone = "eu-central-1b"
         cidr_block        = "10.101.2.0/24"
       }
     },
     "prod" = {
-      "${module.subnet_private_name.default}" = {
+      "${module.subnet_private_name.default}-1" = {
         availability_zone = "eu-central-1a"
         cidr_block        = "10.100.1.0/24"
       },
-      "${module.subnet_private_name.default}" = {
-        availability_zone = "eu-central-1a"
+      "${module.subnet_private_name.default}-2" = {
+        availability_zone = "eu-central-1b"
         cidr_block        = "10.100.2.0/24"
       }
     }
@@ -41,32 +41,32 @@ locals {
 
   public_subnets = {
     "acc" = {
-      "${module.subnet_private_name.default}" = {
+      "${module.subnet_public_name.default}-1" = {
         availability_zone = "eu-central-1a"
         cidr_block        = "10.102.101.0/24"
       },
-      "${module.subnet_private_name.default}" = {
-        availability_zone = "eu-central-1a"
+      "${module.subnet_public_name.default}-2" = {
+        availability_zone = "eu-central-1b"
         cidr_block        = "10.102.102.0/24"
       }
     },
     "dev" = {
-      "${module.subnet_private_name.default}" = {
+      "${module.subnet_public_name.default}-1" = {
         availability_zone = "eu-central-1a"
         cidr_block        = "10.101.101.0/24"
       },
-      "${module.subnet_private_name.default}" = {
-        availability_zone = "eu-central-1a"
+      "${module.subnet_public_name.default}-2" = {
+        availability_zone = "eu-central-1b"
         cidr_block        = "10.101.102.0/24"
       }
     },
     "prod" = {
-      "${module.subnet_private_name.default}" = {
+      "${module.subnet_public_name.default}-1" = {
         availability_zone = "eu-central-1a"
         cidr_block        = "10.100.101.0/24"
       },
-      "${module.subnet_private_name.default}" = {
-        availability_zone = "eu-central-1a"
+      "${module.subnet_public_name.default}-2" = {
+        availability_zone = "eu-central-1b"
         cidr_block        = "10.100.102.0/24"
       }
     }
