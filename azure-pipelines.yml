@@ -22,26 +22,6 @@ variables:
     value: dev
   ${{ if contains(variables['Build.SourceBranchName'], 'tag')}}: 
     value: dev    
-- name: OpportunityImageName
-  value: opportunity
-- name: CustomerImageName
-  value: customer
-- name: ServiceImageName
-  value: service
-- name: AppSettingImageName
-  value: appsetting  
-- name: TF_OUTPUT_S3_BUCKETNAME
-  value: "Empty"
-- name: TF_OUTPUT_ALB_DNSNAME
-  value: "Empty"
-- name: TF_OUTPUT_COTGNITO_AUDIENCE
-  value: "Empty"
-- name: TF_OUTPUT_COTGNITO_POOLID
-  value: "Empty"
-- name: TF_OUTPUT_COTGNITOS_AUDIENCE
-  value: "Empty"
-- name: TF_OUTPUT_COTGNITOS_POOLID
-  value: "Empty"
 
 stages:
   - stage: 
