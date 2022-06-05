@@ -22,10 +22,6 @@ variables:
     value: dev
   ${{ if contains(variables['Build.SourceBranchName'], 'tag')}}: 
     value: dev    
-- name : CostCenter
-  value: ABC000CBA
-- name: Region
-  value: EUC1
 - name: OpportunityImageName
   value: opportunity
 - name: CustomerImageName
@@ -87,7 +83,7 @@ stages:
               provider: 'aws'
               command: 'validate'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/solution/cognito'
-              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=$(projectname)" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
+              commandOptions: '-var "region_short_name=$(region_short_name)" -var "costcenter=$(costcenter)" -var "projectname=$(projectname)" -var "environment=${{variables.environment}}" '
 
 #-----------------------------------------------------------------------------------------------------------------------------------
   - stage: 
@@ -121,5 +117,5 @@ stages:
               provider: 'aws'
               command: 'apply'
               workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/solution/cognito'
-              commandOptions: '-var "region=${{variables.Region}}" -var "costcenter=${{variables.CostCenter}}" -var "projectname=$(projectname)" -var "environment=${{variables.environment}}" -var "imagenames=${{variables.OpportunityImageName}},${{variables.CustomerImageName}},${{variables.ServiceImageName}},${{variables.AppSettingImageName}}" -var "tag=$(Build.BuildId)"'
+              commandOptions: '-var "region_short_name=$(region_short_name)" -var "costcenter=$(costcenter)" -var "projectname=$(projectname)" -var "environment=${{variables.environment}}" '
               environmentServiceNameAWS: 'aws-sample-connection'                   
