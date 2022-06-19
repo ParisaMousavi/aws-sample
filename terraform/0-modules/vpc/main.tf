@@ -15,6 +15,10 @@ resource "aws_vpc" "this" {
   )
 }
 
+#-----------------------------------------------
+#               internet gateway 
+#               if internet gateway is needed
+#-----------------------------------------------
 resource "aws_internet_gateway" "this" {
   count  = var.with_internet_gateway == true ? 1 : 0
   vpc_id = aws_vpc.this.id
@@ -27,6 +31,10 @@ resource "aws_internet_gateway" "this" {
   )
 }
 
+#-----------------------------------------------
+#               add internet gateway to the default route table
+#               if internet gateway is needed
+#-----------------------------------------------
 resource "aws_route" "this" {
   count = var.with_internet_gateway == true ? 1 : 0
   depends_on = [
@@ -37,6 +45,25 @@ resource "aws_route" "this" {
   gateway_id             = aws_internet_gateway.this[0].id
 }
 
+
+#-----------------------------------------------
+#               update default route table tags
+#-----------------------------------------------
+resource "aws_default_route_table" "this" {
+  default_route_table_id = aws_vpc.this.main_route_table_id
+  tags = merge(
+    var.tags,
+    {
+      created-by = "terraform"
+      Name = var.default_route_table_name
+    },
+  )
+}
+
+
+#-----------------------------------------------
+#               private subnet
+#-----------------------------------------------
 resource "aws_subnet" "private" {
   for_each          = var.private_subnets
   cidr_block        = each.value.cidr_block
@@ -52,6 +79,9 @@ resource "aws_subnet" "private" {
   )
 }
 
+#-----------------------------------------------
+#               subnet subnet
+#-----------------------------------------------
 resource "aws_subnet" "public" {
   for_each          = var.public_subnets
   cidr_block        = each.value.cidr_block
@@ -67,7 +97,10 @@ resource "aws_subnet" "public" {
   )
 }
 
-// this is only for oublic subnets
+#-----------------------------------------------
+#               associate public subnet with
+#               the deafult route table
+#-----------------------------------------------
 resource "aws_route_table_association" "this" {
   for_each       = aws_subnet.public
   subnet_id      = each.value.id

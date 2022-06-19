@@ -2,6 +2,10 @@ variable "name" {
   type = string
 }
 
+variable "default_route_table_name" {
+  type = string
+}
+
 variable "tags" {
   default = {}
   type    = map(string)
