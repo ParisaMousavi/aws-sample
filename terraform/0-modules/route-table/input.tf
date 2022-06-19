@@ -14,6 +14,10 @@ variable "routes" {
   }))
 }
 
-variable "subnet_ids" {
-  type = list(string)
+# variable "subnet_ids" {
+#   type = list(string)
+# }
+
+variable "subnet_tag_name" {
+  type = string
 }

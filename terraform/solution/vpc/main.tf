@@ -157,6 +157,7 @@ module "default_route_table" {
 #   region_short_name = var.region_short_name
 # }
 
+<<<<<<< HEAD
 # module "private_route_table" {
 #   source = "../../0-modules/route-table"
 #   depends_on = [
@@ -172,3 +173,21 @@ module "default_route_table" {
 #     CostCenter  = var.costcenter
 #   }
 # }
+=======
+module "private_route_table" {
+  source = "../../0-modules/route-table"
+  depends_on = [
+    module.vpc
+  ]
+  vpc_id                 = module.vpc.vpc_id
+  routes                 = {} // for later if NAT is needed
+  # subnet_ids             = module.vpc.private_subnets // for later if NAT is needed
+  subnet_tag_name = 
+  tags = {
+    Name        = module.route_table_name.default
+    Environment = var.environment
+    Project     = var.projectname
+    CostCenter  = var.costcenter
+  }
+}
+>>>>>>> 4ca5bfd5ef14de9b91bbbdc1c278bf3493e047ae
