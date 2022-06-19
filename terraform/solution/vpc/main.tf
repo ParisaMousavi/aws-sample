@@ -125,14 +125,13 @@ module "default_route_table_name" {
 }
 
 module "default_route_table" {
-  source = "../../0-modules/route-table"
+  source = "../../0-modules/default-route-table"
   depends_on = [
     module.vpc
   ]
-  # default_route_table_id = module.vpc.default_route_table_id
   vpc_id                 = module.vpc.vpc_id
   routes                 = {} // for later if NAT is needed
-  subnet_ids             = [] // for later if NAT is needed
+  subnet_ids             = module.vpc.public_subnets // for later if NAT is needed
   tags = {
     Name        = module.default_route_table_name.default
     Environment = var.environment
@@ -154,10 +153,9 @@ module "private_route_table" {
   depends_on = [
     module.vpc
   ]
-  # default_route_table_id = null
   vpc_id                 = module.vpc.vpc_id
   routes                 = {} // for later if NAT is needed
-  subnet_ids             = [] // for later if NAT is needed
+  subnet_ids             = module.vpc.private_subnets // for later if NAT is needed
   tags = {
     Name        = module.route_table_name.default
     Environment = var.environment
