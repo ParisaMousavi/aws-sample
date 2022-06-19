@@ -1,7 +1,7 @@
-variable "default_route_table_id" {
-  type = string
-  default = null
-}
+# variable "default_route_table_id" {
+#   type = string
+#   default = null
+# }
 
 variable "tags" {
   default = {}

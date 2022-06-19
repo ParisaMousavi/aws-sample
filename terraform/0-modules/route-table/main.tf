@@ -1,6 +1,10 @@
+data "aws_vpc" "default" {
+  id = var.vpc_id
+}
+
 resource "aws_default_route_table" "this" {
-  count                  = var.default_route_table_id != null ? 1 : 0
-  default_route_table_id = var.default_route_table_id
+  # count                  = var.default_route_table_id != null ? 1 : 0
+  default_route_table_id = data.aws_vpc.default.main_route_table_id
   route                  = []
   tags = merge(
     var.tags,
@@ -11,7 +15,7 @@ resource "aws_default_route_table" "this" {
 }
 
 resource "aws_route_table" "this" {
-  count  = var.routes == null || var.vpc_id == null ? 0 : 1
+  count  = var.routes == null ? 0 : 1
   vpc_id = var.vpc_id
   dynamic "route" {
     for_each = var.routes
