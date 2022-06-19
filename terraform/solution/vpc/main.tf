@@ -155,7 +155,8 @@ module "private_route_table" {
   ]
   vpc_id                 = module.vpc.vpc_id
   routes                 = {} // for later if NAT is needed
-  subnet_ids             = module.vpc.private_subnets // for later if NAT is needed
+  # subnet_ids             = module.vpc.private_subnets // for later if NAT is needed
+  subnet_tag_name = 
   tags = {
     Name        = module.route_table_name.default
     Environment = var.environment
