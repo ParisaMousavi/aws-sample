@@ -15,3 +15,7 @@ output "public_subnets" {
   value =  [for k,v in aws_subnet.public : v.id]
 
 }
+
+output "internet_gateway_id" {
+  value = var.with_internet_gateway == true ?  aws_internet_gateway.this[0].id : null
+}

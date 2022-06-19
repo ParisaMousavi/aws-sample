@@ -10,7 +10,7 @@ variable "vpc_id" {
 variable "routes" {
   type = map(object({
     cidr_block = string
-    nat_gateway_id = string
+    gateway_id = string
   }))
 }
 
